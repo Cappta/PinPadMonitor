@@ -26,6 +26,8 @@ namespace PinPadMonitor
 			InitializeComponent();
 			this.LoadSettings();
 			this.FormClosed += this.SaveSettings;
+
+			this.UxTreeView.KeyDown += this.TreeViewCopyHandler;
 		}
 
 		private void LoadSettings()
@@ -39,6 +41,16 @@ namespace PinPadMonitor
 			Settings.Default.VirtualSerialPort = this.UxComboVirtualCom.Text;
 			Settings.Default.RealSerialPort = this.UxComboRealCom.Text;
 			Settings.Default.Save();
+		}
+
+		private void TreeViewCopyHandler(object sender, KeyEventArgs e)
+		{
+			if (e.Alt || e.Control == false || e.Shift || e.KeyCode != Keys.C) { return; }
+
+			var treeView = sender as TreeView;
+			if (treeView?.SelectedNode == null) { return; }
+
+			Clipboard.SetText(treeView.SelectedNode.Text);
 		}
 
 		private void UxComUpdateTimer_Tick(object sender, System.EventArgs e)
