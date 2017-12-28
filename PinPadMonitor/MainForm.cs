@@ -2,11 +2,15 @@
 using PinPadEmulator;
 using PinPadEmulator.Crypto;
 using PinPadEmulator.Devices;
+using PinPadMonitor.Extensions;
 using PinPadMonitor.Properties;
 using PinPadSDK;
 using PinPadSDK.Commands;
+using PinPadSDK.Commands.Enums;
+using PinPadSDK.Commands.Responses;
+using PinPadSDK.Extensions;
+using PinPadSDK.Fields;
 using PinPadSDK.Windows;
-using System;
 using System.IO.Ports;
 using System.Linq;
 using System.Windows.Forms;
@@ -15,6 +19,8 @@ namespace PinPadMonitor
 {
 	public partial class MainForm : Form
 	{
+		private const int RESPONSE_STATUS_TREE_NODE_INDEX = 2;
+
 		private Interceptor interceptor;
 
 		private readonly Deserializer<BaseCommand> deserializer = new Deserializer<BaseCommand>();
@@ -126,46 +132,79 @@ namespace PinPadMonitor
 
 		private void OnRequest(string request)
 		{
-			this.Invoke(new Action(() =>
-			{
-				this.AppendCommand("REQ", request);
-			}));
+			this.ExecuteOnUIThread(() => this.AppendCommand("REQ", request));
 		}
 
 		private void OnResponse(string response)
 		{
-			this.Invoke(new Action(() =>
-			{
-				this.AppendCommand("RES", response);
-			}));
+			this.ExecuteOnUIThread(() => this.AppendCommand("RES", response));
 		}
 
-		private void AppendCommand(string prefix, string command)
+		private void AppendCommand(string prefix, string serialized)
 		{
-			var commandObject = this.deserializer.Deserialize(command);
+			var deserialized = this.deserializer.Deserialize(serialized);
 
 			lock (this.lockObject)
 			{
-				var node = this.UxTreeView.Nodes.Add($"{prefix}: {command}");
-				var type = commandObject.GetType();
-				var properties = type.GetProperties();
-				foreach (var property in properties)
+				var node = this.UxTreeView.Nodes.Add($"{prefix}: {serialized}");
+				this.ExpandIntoNode(node, deserialized);
+			}
+		}
+
+		private void ExpandIntoNode(TreeNode node, object obj)
+		{
+			node.Nodes.Add(obj.ToString());
+			var type = obj.GetType();
+			var properties = type.GetProperties();
+			foreach (var property in properties)
+			{
+				dynamic value = property.GetValue(obj, null);
+
+				var valueNode = default(TreeNode);
+				try
 				{
-					dynamic value = property.GetValue(commandObject, null);
-
-					try
+					switch (value.Value)
 					{
-						var valueString = default(string);
-						if(value.Value.GetType() == typeof(byte[])) { valueString = value.ToString(); }
-						else { valueString = value.Value.ToString(); }
+						case byte[] byteArrayValue:
+							valueNode = node.Nodes.Add($"{property.Name}: {value} | {byteArrayValue.ToHexString()}");
+							valueNode.Nodes.Add(property.Name);
+							valueNode.Nodes.Add(value.ToString());
+							valueNode.Nodes.Add(byteArrayValue.ToHexString());
+							break;
 
-						node.Nodes.Add($"{property.Name} = {valueString}");
-						continue;
+						case FieldGroup fieldGroupValue:
+							valueNode = node.Nodes.Add($"{property.Name}: {value} | {fieldGroupValue}");
+							valueNode.Nodes.Add(property.Name);
+							valueNode.Nodes.Add(value.ToString());
+							this.ExpandIntoNode(valueNode, fieldGroupValue);
+							break;
+
+						case ReturnCode returnCodeValue:
+							valueNode = node.Nodes.Insert(RESPONSE_STATUS_TREE_NODE_INDEX, $"{property.Name}: {value} | {returnCodeValue}");
+							valueNode.Nodes.Add(property.Name);
+							valueNode.Nodes.Add(value.ToString());
+							valueNode.Nodes.Add(returnCodeValue.ToString());
+							break;
+
+						default:
+							var valueString = value.ToString();
+
+							var objectValue = value.Value as object;
+							var objectValueString = objectValue?.ToString();
+
+							valueNode = node.Nodes.Add($"{property.Name}: {valueString} | {objectValueString}");
+							valueNode.Nodes.Add(property.Name);
+							valueNode.Nodes.Add(valueString);
+							if (valueString != objectValueString) { valueNode.Nodes.Add(objectValueString); }
+							break;
 					}
-					catch (RuntimeBinderException)
-					{
-						node.Nodes.Add($"{property.Name} = {value}");
-					}
+					continue;
+				}
+				catch (RuntimeBinderException)
+				{
+					valueNode = node.Nodes.Add($"{property.Name}: {value}");
+					valueNode.Nodes.Add(property.Name);
+					valueNode.Nodes.Add(value.ToString());
 				}
 			}
 		}
