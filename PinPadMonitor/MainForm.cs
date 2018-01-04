@@ -1,5 +1,4 @@
-﻿using Microsoft.CSharp.RuntimeBinder;
-using PinPadEmulator;
+﻿using PinPadEmulator;
 using PinPadEmulator.Crypto;
 using PinPadEmulator.Devices;
 using PinPadMonitor.Extensions;
@@ -7,7 +6,6 @@ using PinPadMonitor.Properties;
 using PinPadSDK;
 using PinPadSDK.Commands;
 using PinPadSDK.Commands.Enums;
-using PinPadSDK.Commands.Responses;
 using PinPadSDK.Extensions;
 using PinPadSDK.Fields;
 using PinPadSDK.Windows;
@@ -158,12 +156,16 @@ namespace PinPadMonitor
 			var properties = type.GetProperties();
 			foreach (var property in properties)
 			{
-				dynamic value = property.GetValue(obj, null);
+				var value = property.GetValue(obj, null);
+				var dynamicValue = value as dynamic;
+				var valueType = value?.GetType();
+				var genericType = valueType?.IsGenericType == true ? valueType.GetGenericTypeDefinition() : null;
 
 				var valueNode = default(TreeNode);
-				try
+				if (genericType == typeof(Field<>))
 				{
-					switch (value.Value)
+					var fieldValue = dynamicValue.Value as object;
+					switch (fieldValue)
 					{
 						case byte[] byteArrayValue:
 							valueNode = node.Nodes.Add($"{property.Name}: {value} | {byteArrayValue.ToHexString()}");
@@ -189,8 +191,7 @@ namespace PinPadMonitor
 						default:
 							var valueString = value.ToString();
 
-							var objectValue = value.Value as object;
-							var objectValueString = objectValue?.ToString();
+							var objectValueString = fieldValue?.ToString();
 
 							valueNode = node.Nodes.Add($"{property.Name}: {valueString} | {objectValueString}");
 							valueNode.Nodes.Add(property.Name);
@@ -198,13 +199,23 @@ namespace PinPadMonitor
 							if (valueString != objectValueString) { valueNode.Nodes.Add(objectValueString); }
 							break;
 					}
-					continue;
 				}
-				catch (RuntimeBinderException)
+				else if (genericType == typeof(FieldList<>))
 				{
 					valueNode = node.Nodes.Add($"{property.Name}: {value}");
 					valueNode.Nodes.Add(property.Name);
 					valueNode.Nodes.Add(value.ToString());
+					foreach (var entry in dynamicValue)
+					{
+						var entryNode = valueNode.Nodes.Add($"{entry}");
+						ExpandIntoNode(entryNode, entry);
+					}
+				}
+				else
+				{
+					valueNode = node.Nodes.Add($"{property.Name}: {value}");
+					valueNode.Nodes.Add(property.Name);
+					valueNode.Nodes.Add(value?.ToString());
 				}
 			}
 		}
