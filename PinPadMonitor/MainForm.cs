@@ -211,11 +211,23 @@ namespace PinPadMonitor
 						ExpandIntoNode(entryNode, entry);
 					}
 				}
-				else
+				else if(value is byte[] byteArrayValue)
+				{
+					valueNode = node.Nodes.Add($"{property.Name}: {byteArrayValue.ToHexString()}");
+					valueNode.Nodes.Add(property.Name);
+					valueNode.Nodes.Add(byteArrayValue.ToHexString());
+				}
+				else if (value == null || property.PropertyType.IsPrimitive || property.PropertyType == typeof(string))
 				{
 					valueNode = node.Nodes.Add($"{property.Name}: {value}");
 					valueNode.Nodes.Add(property.Name);
 					valueNode.Nodes.Add(value?.ToString());
+				}
+				else
+				{
+					valueNode = node.Nodes.Add($"{property.Name}: {value}");
+					valueNode.Nodes.Add(property.Name);
+					this.ExpandIntoNode(valueNode, value);
 				}
 			}
 		}
