@@ -9,6 +9,7 @@ using PinPadSDK.Commands.Enums;
 using PinPadSDK.Extensions;
 using PinPadSDK.Fields;
 using PinPadSDK.Windows;
+using System;
 using System.IO.Ports;
 using System.Linq;
 using System.Windows.Forms;
@@ -217,7 +218,7 @@ namespace PinPadMonitor
 					valueNode.Nodes.Add(property.Name);
 					valueNode.Nodes.Add(byteArrayValue.ToHexString());
 				}
-				else if (value == null || property.PropertyType.IsPrimitive || property.PropertyType == typeof(string))
+				else if (value == null || property.PropertyType.IsPrimitive || property.PropertyType == typeof(string) || property.PropertyType == typeof(DateTime))
 				{
 					valueNode = node.Nodes.Add($"{property.Name}: {value}");
 					valueNode.Nodes.Add(property.Name);
