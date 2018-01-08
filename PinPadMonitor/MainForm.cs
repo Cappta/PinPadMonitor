@@ -201,7 +201,8 @@ namespace PinPadMonitor
 							break;
 					}
 				}
-				else if (genericType == typeof(FieldList<>))
+				else if (genericType == typeof(FieldList<>)
+					|| genericType == typeof(ConcatenatedFieldList<>))
 				{
 					valueNode = node.Nodes.Add($"{property.Name}: {value}");
 					valueNode.Nodes.Add(property.Name);
@@ -212,7 +213,7 @@ namespace PinPadMonitor
 						ExpandIntoNode(entryNode, entry);
 					}
 				}
-				else if(value is byte[] byteArrayValue)
+				else if (value is byte[] byteArrayValue)
 				{
 					valueNode = node.Nodes.Add($"{property.Name}: {byteArrayValue.ToHexString()}");
 					valueNode.Nodes.Add(property.Name);
