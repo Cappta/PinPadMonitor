@@ -58,6 +58,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command.cs" />
+    <Compile Include="CommandsExporter.cs" />
+    <Compile Include="CommandsImporter.cs" />
     <Compile Include="Extensions\ControlExtensions.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

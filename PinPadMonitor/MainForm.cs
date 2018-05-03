@@ -10,6 +10,7 @@ using PinPadSDK.Extensions;
 using PinPadSDK.Fields;
 using PinPadSDK.Windows;
 using System;
+using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Windows.Forms;
@@ -19,16 +20,24 @@ namespace PinPadMonitor
 	public partial class MainForm : Form
 	{
 		private const int RESPONSE_STATUS_TREE_NODE_INDEX = 2;
+		private const string START_BUTTON_TEXT = "START";
+		private const string STOP_BUTTON_TEXT = "STOP";
 
 		private Interceptor interceptor;
 
 		private readonly Deserializer<BaseCommand> deserializer = new Deserializer<BaseCommand>();
 
-		private object lockObject = new object();
+		private readonly object lockObject = new object();
+		private IList<Command> storedCommands;
+		private readonly CommandsExporter commandsExporter;
+		private readonly CommandsImporter commandsImporter;
 
 		public MainForm()
 		{
-			InitializeComponent();
+			this.storedCommands = new List<Command>();
+			this.commandsExporter = new CommandsExporter();
+			this.commandsImporter = new CommandsImporter();
+			this.InitializeComponent();
 			this.LoadSettings();
 			this.FormClosed += this.SaveSettings;
 
@@ -87,17 +96,17 @@ namespace PinPadMonitor
 
 		private void UxButtonStart_Click(object sender, System.EventArgs e)
 		{
-			if (this.UxButtonStart.Text == "START")
+			if (this.UxButtonStart.Text == START_BUTTON_TEXT)
 			{
 				this.StartIntercepting();
 				this.DisableUxItems();
-				this.UxButtonStart.Text = "STOP";
+				this.UxButtonStart.Text = STOP_BUTTON_TEXT;
 			}
 			else
 			{
 				this.StopInterceptor();
 				this.EnableUxItems();
-				this.UxButtonStart.Text = "START";
+				this.UxButtonStart.Text = START_BUTTON_TEXT;
 			}
 		}
 
@@ -131,22 +140,23 @@ namespace PinPadMonitor
 
 		private void OnRequest(string request)
 		{
-			this.ExecuteOnUIThread(() => this.AppendCommand("REQ", request));
+			this.ExecuteOnUIThread(() => this.AppendCommand(Command.Request(request)));
 		}
 
 		private void OnResponse(string response)
 		{
-			this.ExecuteOnUIThread(() => this.AppendCommand("RES", response));
+			this.ExecuteOnUIThread(() => this.AppendCommand(Command.Response(response)));
 		}
 
-		private void AppendCommand(string prefix, string serialized)
+		private void AppendCommand(Command command)
 		{
-			var deserialized = this.deserializer.Deserialize(serialized);
+			var deserialized = this.deserializer.Deserialize(command.Content);
 
 			lock (this.lockObject)
 			{
-				var node = this.UxTreeView.Nodes.Add($"{prefix}: {serialized}");
+				var node = this.UxTreeView.Nodes.Add($"{command.Type}: {command.Content}");
 				this.ExpandIntoNode(node, deserialized);
+				this.storedCommands.Add(command);
 			}
 		}
 
@@ -236,9 +246,54 @@ namespace PinPadMonitor
 
 		private void UxButtonReset_Click(object sender, System.EventArgs e)
 		{
+			this.ResetCommands();
+		}
+
+		private void UxButtonExport_Click(object sender, EventArgs e)
+		{
+			var destinationFile = SelectDestinationFile();
+			this.commandsExporter.Export(this.storedCommands, destinationFile);
+		}
+
+		private static string SelectDestinationFile()
+		{
+			var saveFileDialog = new SaveFileDialog();
+			saveFileDialog.InitialDirectory = "%HOMEPATH%";
+			saveFileDialog.Filter = "pmf files (*.pmf)|*.pmf";
+			saveFileDialog.Title = "Export to a file";
+			saveFileDialog.ShowDialog();
+			return saveFileDialog.FileName;
+		}
+
+		private void UxButtonImport_Click(object sender, EventArgs e)
+		{
+			var sourceFile = SelectSourceFile();
+			var commands = this.commandsImporter.Import(sourceFile);
+			this.ResetCommands();
+
+			foreach (var command in commands)
+			{
+				this.AppendCommand(command);
+			}
+		}
+
+		private static string SelectSourceFile()
+		{
+			var openFileDialog = new OpenFileDialog();
+			openFileDialog.InitialDirectory = "%HOMEPATH%";
+			openFileDialog.Filter = "pmf files (*.pmf)|*.pmf";
+			openFileDialog.Title = "Import PinPad Monitor File";
+			openFileDialog.ShowDialog();
+
+			return openFileDialog.FileName;
+		}
+
+		private void ResetCommands()
+		{
 			lock (this.lockObject)
 			{
 				this.UxTreeView.Nodes.Clear();
+				this.storedCommands.Clear();
 			}
 		}
 	}

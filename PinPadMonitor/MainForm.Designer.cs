@@ -31,12 +31,14 @@
 			this.components = new System.ComponentModel.Container();
 			this.UxTreeView = new System.Windows.Forms.TreeView();
 			this.UxMenuPanel = new System.Windows.Forms.Panel();
+			this.UxButtonImport = new System.Windows.Forms.Button();
+			this.UxButtonExport = new System.Windows.Forms.Button();
+			this.UxButtonReset = new System.Windows.Forms.Button();
+			this.UxButtonStart = new System.Windows.Forms.Button();
 			this.UxComboRealCom = new System.Windows.Forms.ComboBox();
 			this.UxLabelRealCom = new System.Windows.Forms.Label();
 			this.UxLabelVirtualCom = new System.Windows.Forms.Label();
 			this.UxComboVirtualCom = new System.Windows.Forms.ComboBox();
-			this.UxButtonStart = new System.Windows.Forms.Button();
-			this.UxButtonReset = new System.Windows.Forms.Button();
 			this.UxComUpdateTimer = new System.Windows.Forms.Timer(this.components);
 			this.UxMenuPanel.SuspendLayout();
 			this.SuspendLayout();
@@ -46,11 +48,13 @@
 			this.UxTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.UxTreeView.Location = new System.Drawing.Point(0, 64);
 			this.UxTreeView.Name = "UxTreeView";
-			this.UxTreeView.Size = new System.Drawing.Size(354, 267);
+			this.UxTreeView.Size = new System.Drawing.Size(520, 267);
 			this.UxTreeView.TabIndex = 0;
 			// 
 			// UxMenuPanel
 			// 
+			this.UxMenuPanel.Controls.Add(this.UxButtonImport);
+			this.UxMenuPanel.Controls.Add(this.UxButtonExport);
 			this.UxMenuPanel.Controls.Add(this.UxButtonReset);
 			this.UxMenuPanel.Controls.Add(this.UxButtonStart);
 			this.UxMenuPanel.Controls.Add(this.UxComboRealCom);
@@ -60,8 +64,52 @@
 			this.UxMenuPanel.Dock = System.Windows.Forms.DockStyle.Top;
 			this.UxMenuPanel.Location = new System.Drawing.Point(0, 0);
 			this.UxMenuPanel.Name = "UxMenuPanel";
-			this.UxMenuPanel.Size = new System.Drawing.Size(354, 64);
+			this.UxMenuPanel.Size = new System.Drawing.Size(520, 64);
 			this.UxMenuPanel.TabIndex = 1;
+			// 
+			// UxButtonImport
+			// 
+			this.UxButtonImport.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.UxButtonImport.Location = new System.Drawing.Point(434, 12);
+			this.UxButtonImport.Name = "UxButtonImport";
+			this.UxButtonImport.Size = new System.Drawing.Size(80, 39);
+			this.UxButtonImport.TabIndex = 14;
+			this.UxButtonImport.Text = "IMPORT";
+			this.UxButtonImport.UseVisualStyleBackColor = true;
+			this.UxButtonImport.Click += new System.EventHandler(this.UxButtonImport_Click);
+			// 
+			// UxButtonExport
+			// 
+			this.UxButtonExport.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.UxButtonExport.Location = new System.Drawing.Point(348, 12);
+			this.UxButtonExport.Name = "UxButtonExport";
+			this.UxButtonExport.Size = new System.Drawing.Size(80, 39);
+			this.UxButtonExport.TabIndex = 13;
+			this.UxButtonExport.Text = "EXPORT";
+			this.UxButtonExport.UseVisualStyleBackColor = true;
+			this.UxButtonExport.Click += new System.EventHandler(this.UxButtonExport_Click);
+			// 
+			// UxButtonReset
+			// 
+			this.UxButtonReset.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.UxButtonReset.Location = new System.Drawing.Point(262, 12);
+			this.UxButtonReset.Name = "UxButtonReset";
+			this.UxButtonReset.Size = new System.Drawing.Size(80, 39);
+			this.UxButtonReset.TabIndex = 12;
+			this.UxButtonReset.Text = "RESET";
+			this.UxButtonReset.UseVisualStyleBackColor = true;
+			this.UxButtonReset.Click += new System.EventHandler(this.UxButtonReset_Click);
+			// 
+			// UxButtonStart
+			// 
+			this.UxButtonStart.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.UxButtonStart.Location = new System.Drawing.Point(176, 12);
+			this.UxButtonStart.Name = "UxButtonStart";
+			this.UxButtonStart.Size = new System.Drawing.Size(80, 39);
+			this.UxButtonStart.TabIndex = 9;
+			this.UxButtonStart.Text = "START";
+			this.UxButtonStart.UseVisualStyleBackColor = true;
+			this.UxButtonStart.Click += new System.EventHandler(this.UxButtonStart_Click);
 			// 
 			// UxComboRealCom
 			// 
@@ -97,28 +145,6 @@
 			this.UxComboVirtualCom.Size = new System.Drawing.Size(76, 21);
 			this.UxComboVirtualCom.TabIndex = 5;
 			// 
-			// UxButtonStart
-			// 
-			this.UxButtonStart.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.UxButtonStart.Location = new System.Drawing.Point(176, 12);
-			this.UxButtonStart.Name = "UxButtonStart";
-			this.UxButtonStart.Size = new System.Drawing.Size(80, 39);
-			this.UxButtonStart.TabIndex = 9;
-			this.UxButtonStart.Text = "START";
-			this.UxButtonStart.UseVisualStyleBackColor = true;
-			this.UxButtonStart.Click += new System.EventHandler(this.UxButtonStart_Click);
-			// 
-			// UxButtonReset
-			// 
-			this.UxButtonReset.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.UxButtonReset.Location = new System.Drawing.Point(262, 12);
-			this.UxButtonReset.Name = "UxButtonReset";
-			this.UxButtonReset.Size = new System.Drawing.Size(80, 39);
-			this.UxButtonReset.TabIndex = 12;
-			this.UxButtonReset.Text = "RESET";
-			this.UxButtonReset.UseVisualStyleBackColor = true;
-			this.UxButtonReset.Click += new System.EventHandler(this.UxButtonReset_Click);
-			// 
 			// UxComUpdateTimer
 			// 
 			this.UxComUpdateTimer.Enabled = true;
@@ -129,7 +155,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(354, 331);
+			this.ClientSize = new System.Drawing.Size(520, 331);
 			this.Controls.Add(this.UxTreeView);
 			this.Controls.Add(this.UxMenuPanel);
 			this.MinimumSize = new System.Drawing.Size(370, 370);
@@ -152,6 +178,8 @@
 		private System.Windows.Forms.Label UxLabelVirtualCom;
 		private System.Windows.Forms.ComboBox UxComboVirtualCom;
 		private System.Windows.Forms.Timer UxComUpdateTimer;
+		private System.Windows.Forms.Button UxButtonExport;
+		private System.Windows.Forms.Button UxButtonImport;
 	}
 }
 
