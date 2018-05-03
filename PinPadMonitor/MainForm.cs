@@ -28,7 +28,7 @@ namespace PinPadMonitor
 		private readonly Deserializer<BaseCommand> deserializer = new Deserializer<BaseCommand>();
 
 		private readonly object lockObject = new object();
-		private IList<Command> storedCommands;
+		private readonly IList<Command> storedCommands;
 		private readonly CommandsExporter commandsExporter;
 		private readonly CommandsImporter commandsImporter;
 
@@ -251,8 +251,12 @@ namespace PinPadMonitor
 
 		private void UxButtonExport_Click(object sender, EventArgs e)
 		{
-			var destinationFile = SelectDestinationFile();
-			this.commandsExporter.Export(this.storedCommands, destinationFile);
+			lock (this.lockObject)
+			{
+				var destinationFile = SelectDestinationFile();
+				if (string.IsNullOrEmpty(destinationFile)) { return; }
+				this.commandsExporter.Export(this.storedCommands, destinationFile);
+			}
 		}
 
 		private static string SelectDestinationFile()
@@ -268,9 +272,10 @@ namespace PinPadMonitor
 		private void UxButtonImport_Click(object sender, EventArgs e)
 		{
 			var sourceFile = SelectSourceFile();
-			var commands = this.commandsImporter.Import(sourceFile);
-			this.ResetCommands();
+			if (string.IsNullOrEmpty(sourceFile)) { return; }
 
+			this.ResetCommands();
+			var commands = this.commandsImporter.Import(sourceFile);
 			foreach (var command in commands)
 			{
 				this.AppendCommand(command);
