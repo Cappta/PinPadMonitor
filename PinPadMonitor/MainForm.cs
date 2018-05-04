@@ -28,15 +28,12 @@ namespace PinPadMonitor
 		private readonly Deserializer<BaseCommand> deserializer = new Deserializer<BaseCommand>();
 
 		private readonly object lockObject = new object();
-		private readonly IList<Command> storedCommands;
-		private readonly CommandsExporter commandsExporter;
-		private readonly CommandsImporter commandsImporter;
+		private readonly IList<Command> storedCommands = new List<Command>();
+		private readonly CommandsExporter commandsExporter = new CommandsExporter();
+		private readonly CommandsImporter commandsImporter = new CommandsImporter();
 
 		public MainForm()
 		{
-			this.storedCommands = new List<Command>();
-			this.commandsExporter = new CommandsExporter();
-			this.commandsImporter = new CommandsImporter();
 			this.InitializeComponent();
 			this.LoadSettings();
 			this.FormClosed += this.SaveSettings;
@@ -140,21 +137,22 @@ namespace PinPadMonitor
 
 		private void OnRequest(string request)
 		{
-			this.ExecuteOnUIThread(() => this.AppendCommand(Command.Request(request)));
+			this.ExecuteOnUIThread(() => this.AppendCommand(new Command(CommandType.Request, request)));
 		}
 
 		private void OnResponse(string response)
 		{
-			this.ExecuteOnUIThread(() => this.AppendCommand(Command.Response(response)));
+			this.ExecuteOnUIThread(() => this.AppendCommand(new Command(CommandType.Response, response)));
 		}
 
 		private void AppendCommand(Command command)
 		{
 			var deserialized = this.deserializer.Deserialize(command.Content);
+			var typeName = command.Type == CommandType.Request ? "REQ" : "RES";
 
 			lock (this.lockObject)
 			{
-				var node = this.UxTreeView.Nodes.Add($"{command.Type}: {command.Content}");
+				var node = this.UxTreeView.Nodes.Add($"{typeName}: {command.Content}");
 				this.ExpandIntoNode(node, deserialized);
 				this.storedCommands.Add(command);
 			}
