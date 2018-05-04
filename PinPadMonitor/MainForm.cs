@@ -10,6 +10,7 @@ using PinPadSDK.Extensions;
 using PinPadSDK.Fields;
 using PinPadSDK.Windows;
 using System;
+using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Windows.Forms;
@@ -19,16 +20,21 @@ namespace PinPadMonitor
 	public partial class MainForm : Form
 	{
 		private const int RESPONSE_STATUS_TREE_NODE_INDEX = 2;
+		private const string START_BUTTON_TEXT = "START";
+		private const string STOP_BUTTON_TEXT = "STOP";
 
 		private Interceptor interceptor;
 
 		private readonly Deserializer<BaseCommand> deserializer = new Deserializer<BaseCommand>();
 
-		private object lockObject = new object();
+		private readonly object lockObject = new object();
+		private readonly IList<Command> storedCommands = new List<Command>();
+		private readonly CommandsExporter commandsExporter = new CommandsExporter();
+		private readonly CommandsImporter commandsImporter = new CommandsImporter();
 
 		public MainForm()
 		{
-			InitializeComponent();
+			this.InitializeComponent();
 			this.LoadSettings();
 			this.FormClosed += this.SaveSettings;
 
@@ -87,17 +93,17 @@ namespace PinPadMonitor
 
 		private void UxButtonStart_Click(object sender, System.EventArgs e)
 		{
-			if (this.UxButtonStart.Text == "START")
+			if (this.UxButtonStart.Text == START_BUTTON_TEXT)
 			{
 				this.StartIntercepting();
 				this.DisableUxItems();
-				this.UxButtonStart.Text = "STOP";
+				this.UxButtonStart.Text = STOP_BUTTON_TEXT;
 			}
 			else
 			{
 				this.StopInterceptor();
 				this.EnableUxItems();
-				this.UxButtonStart.Text = "START";
+				this.UxButtonStart.Text = START_BUTTON_TEXT;
 			}
 		}
 
@@ -131,22 +137,24 @@ namespace PinPadMonitor
 
 		private void OnRequest(string request)
 		{
-			this.ExecuteOnUIThread(() => this.AppendCommand("REQ", request));
+			this.ExecuteOnUIThread(() => this.AppendCommand(new Command(CommandType.Request, request)));
 		}
 
 		private void OnResponse(string response)
 		{
-			this.ExecuteOnUIThread(() => this.AppendCommand("RES", response));
+			this.ExecuteOnUIThread(() => this.AppendCommand(new Command(CommandType.Response, response)));
 		}
 
-		private void AppendCommand(string prefix, string serialized)
+		private void AppendCommand(Command command)
 		{
-			var deserialized = this.deserializer.Deserialize(serialized);
+			var deserialized = this.deserializer.Deserialize(command.Content);
+			var typeName = command.Type == CommandType.Request ? "REQ" : "RES";
 
 			lock (this.lockObject)
 			{
-				var node = this.UxTreeView.Nodes.Add($"{prefix}: {serialized}");
+				var node = this.UxTreeView.Nodes.Add($"{typeName}: {command.Content}");
 				this.ExpandIntoNode(node, deserialized);
+				this.storedCommands.Add(command);
 			}
 		}
 
@@ -236,9 +244,59 @@ namespace PinPadMonitor
 
 		private void UxButtonReset_Click(object sender, System.EventArgs e)
 		{
+			this.ResetCommands();
+		}
+
+		private void UxButtonExport_Click(object sender, EventArgs e)
+		{
+			lock (this.lockObject)
+			{
+				var destinationFile = SelectDestinationFile();
+				if (string.IsNullOrEmpty(destinationFile)) { return; }
+				this.commandsExporter.Export(this.storedCommands, destinationFile);
+			}
+		}
+
+		private static string SelectDestinationFile()
+		{
+			var saveFileDialog = new SaveFileDialog();
+			saveFileDialog.InitialDirectory = "%HOMEPATH%";
+			saveFileDialog.Filter = "json files (*.json)|*.json";
+			saveFileDialog.Title = "Export to a file";
+			saveFileDialog.ShowDialog();
+			return saveFileDialog.FileName;
+		}
+
+		private void UxButtonImport_Click(object sender, EventArgs e)
+		{
+			var sourceFile = SelectSourceFile();
+			if (string.IsNullOrEmpty(sourceFile)) { return; }
+
+			this.ResetCommands();
+			var commands = this.commandsImporter.Import(sourceFile);
+			foreach (var command in commands)
+			{
+				this.AppendCommand(command);
+			}
+		}
+
+		private static string SelectSourceFile()
+		{
+			var openFileDialog = new OpenFileDialog();
+			openFileDialog.InitialDirectory = "%HOMEPATH%";
+			openFileDialog.Filter = "json files (*.json)|*.json";
+			openFileDialog.Title = "Import PinPad Monitor File";
+			openFileDialog.ShowDialog();
+
+			return openFileDialog.FileName;
+		}
+
+		private void ResetCommands()
+		{
 			lock (this.lockObject)
 			{
 				this.UxTreeView.Nodes.Clear();
+				this.storedCommands.Clear();
 			}
 		}
 	}
