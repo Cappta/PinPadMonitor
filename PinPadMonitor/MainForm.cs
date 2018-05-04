@@ -261,7 +261,7 @@ namespace PinPadMonitor
 		{
 			var saveFileDialog = new SaveFileDialog();
 			saveFileDialog.InitialDirectory = "%HOMEPATH%";
-			saveFileDialog.Filter = "pmf files (*.pmf)|*.pmf";
+			saveFileDialog.Filter = "json files (*.json)|*.json";
 			saveFileDialog.Title = "Export to a file";
 			saveFileDialog.ShowDialog();
 			return saveFileDialog.FileName;
@@ -284,7 +284,7 @@ namespace PinPadMonitor
 		{
 			var openFileDialog = new OpenFileDialog();
 			openFileDialog.InitialDirectory = "%HOMEPATH%";
-			openFileDialog.Filter = "pmf files (*.pmf)|*.pmf";
+			openFileDialog.Filter = "json files (*.json)|*.json";
 			openFileDialog.Title = "Import PinPad Monitor File";
 			openFileDialog.ShowDialog();
 
