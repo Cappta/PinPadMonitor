@@ -40,15 +40,19 @@
 			this.UxLabelVirtualCom = new System.Windows.Forms.Label();
 			this.UxComboVirtualCom = new System.Windows.Forms.ComboBox();
 			this.UxComUpdateTimer = new System.Windows.Forms.Timer(this.components);
+			this.UxRequestPanel = new System.Windows.Forms.Panel();
+			this.UxTestBoxManualRequest = new System.Windows.Forms.TextBox();
+			this.UxButtonRequest = new System.Windows.Forms.Button();
 			this.UxMenuPanel.SuspendLayout();
+			this.UxRequestPanel.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// UxTreeView
 			// 
 			this.UxTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.UxTreeView.Location = new System.Drawing.Point(0, 64);
+			this.UxTreeView.Location = new System.Drawing.Point(0, 62);
 			this.UxTreeView.Name = "UxTreeView";
-			this.UxTreeView.Size = new System.Drawing.Size(520, 267);
+			this.UxTreeView.Size = new System.Drawing.Size(520, 221);
 			this.UxTreeView.TabIndex = 0;
 			// 
 			// UxMenuPanel
@@ -64,7 +68,7 @@
 			this.UxMenuPanel.Dock = System.Windows.Forms.DockStyle.Top;
 			this.UxMenuPanel.Location = new System.Drawing.Point(0, 0);
 			this.UxMenuPanel.Name = "UxMenuPanel";
-			this.UxMenuPanel.Size = new System.Drawing.Size(520, 64);
+			this.UxMenuPanel.Size = new System.Drawing.Size(520, 62);
 			this.UxMenuPanel.TabIndex = 1;
 			// 
 			// UxButtonImport
@@ -151,18 +155,54 @@
 			this.UxComUpdateTimer.Interval = 1000;
 			this.UxComUpdateTimer.Tick += new System.EventHandler(this.UxComUpdateTimer_Tick);
 			// 
+			// UxRequestPanel
+			// 
+			this.UxRequestPanel.Controls.Add(this.UxTestBoxManualRequest);
+			this.UxRequestPanel.Controls.Add(this.UxButtonRequest);
+			this.UxRequestPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.UxRequestPanel.Location = new System.Drawing.Point(0, 283);
+			this.UxRequestPanel.Name = "UxRequestPanel";
+			this.UxRequestPanel.Size = new System.Drawing.Size(520, 48);
+			this.UxRequestPanel.TabIndex = 2;
+			// 
+			// UxTestBoxManualRequest
+			// 
+			this.UxTestBoxManualRequest.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.UxTestBoxManualRequest.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.UxTestBoxManualRequest.Location = new System.Drawing.Point(98, 0);
+			this.UxTestBoxManualRequest.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+			this.UxTestBoxManualRequest.Multiline = true;
+			this.UxTestBoxManualRequest.Name = "UxTestBoxManualRequest";
+			this.UxTestBoxManualRequest.Size = new System.Drawing.Size(422, 48);
+			this.UxTestBoxManualRequest.TabIndex = 0;
+			// 
+			// UxButtonRequest
+			// 
+			this.UxButtonRequest.Dock = System.Windows.Forms.DockStyle.Left;
+			this.UxButtonRequest.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.UxButtonRequest.Location = new System.Drawing.Point(0, 0);
+			this.UxButtonRequest.Name = "UxButtonRequest";
+			this.UxButtonRequest.Size = new System.Drawing.Size(98, 48);
+			this.UxButtonRequest.TabIndex = 10;
+			this.UxButtonRequest.Text = "REQUEST";
+			this.UxButtonRequest.UseVisualStyleBackColor = true;
+			this.UxButtonRequest.Click += new System.EventHandler(this.UxButtonRequest_Click);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(520, 331);
 			this.Controls.Add(this.UxTreeView);
+			this.Controls.Add(this.UxRequestPanel);
 			this.Controls.Add(this.UxMenuPanel);
 			this.MinimumSize = new System.Drawing.Size(370, 370);
 			this.Name = "MainForm";
 			this.Text = "PinPad Monitor";
 			this.UxMenuPanel.ResumeLayout(false);
 			this.UxMenuPanel.PerformLayout();
+			this.UxRequestPanel.ResumeLayout(false);
+			this.UxRequestPanel.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -180,6 +220,9 @@
 		private System.Windows.Forms.Timer UxComUpdateTimer;
 		private System.Windows.Forms.Button UxButtonExport;
 		private System.Windows.Forms.Button UxButtonImport;
+		private System.Windows.Forms.Panel UxRequestPanel;
+		private System.Windows.Forms.TextBox UxTestBoxManualRequest;
+		private System.Windows.Forms.Button UxButtonRequest;
 	}
 }
 
