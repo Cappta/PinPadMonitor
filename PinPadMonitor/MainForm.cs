@@ -6,6 +6,7 @@ using PinPadMonitor.Properties;
 using PinPadSDK;
 using PinPadSDK.Commands;
 using PinPadSDK.Commands.Enums;
+using PinPadSDK.Commands.Requests;
 using PinPadSDK.Extensions;
 using PinPadSDK.Fields;
 using PinPadSDK.Windows;
@@ -24,7 +25,9 @@ namespace PinPadMonitor
 		private const string STOP_BUTTON_TEXT = "STOP";
 
 		private Interceptor interceptor;
+		private DetourableDevice detourableDevice;
 
+		private readonly Deserializer<BaseRequest> requestDeserializer = new Deserializer<BaseRequest>();
 		private readonly Deserializer<BaseCommand> deserializer = new Deserializer<BaseCommand>();
 
 		private readonly object lockObject = new object();
@@ -125,7 +128,8 @@ namespace PinPadMonitor
 			var virtualDevice = new DecryptedDevice(cryptoHandler, new SerialDevice(this.UxComboVirtualCom.Text));
 			var realDevice = new DecryptedDevice(cryptoHandler, new SerialDevice(this.UxComboRealCom.Text));
 
-			this.interceptor = new Interceptor(virtualDevice, realDevice);
+			this.detourableDevice = new DetourableDevice(realDevice);
+			this.interceptor = new Interceptor(virtualDevice, this.detourableDevice.GetNextDevice());
 			this.interceptor.Request += this.OnRequest;
 			this.interceptor.Response += this.OnResponse;
 		}
@@ -297,6 +301,20 @@ namespace PinPadMonitor
 			{
 				this.UxTreeView.Nodes.Clear();
 				this.storedCommands.Clear();
+			}
+		}
+
+		private void UxButtonRequest_Click(object sender, EventArgs e)
+		{
+			using(var device = this.detourableDevice.GetNextDevice())
+			{
+				var driver = new Driver(device);
+
+				var command = this.UxTestBoxManualRequest.Text;
+				var request = this.requestDeserializer.Deserialize(command);
+				this.OnRequest(request.ToString());
+				var response = driver.Request(request);
+				this.OnResponse(response.ToString());
 			}
 		}
 	}
