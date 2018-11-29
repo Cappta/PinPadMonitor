@@ -8,6 +8,7 @@ namespace PinPadMonitor
 		public event Action<byte[]> Output;
 		public event Action<ManualDevice, byte[]> InputCalled;
 		public event Action<ManualDevice> DisposeCalled;
+		public event Action<Exception> ReadException;
 
 		public void InvokeOutput(byte[] data)
 		{
